@@ -246,43 +246,76 @@
   <div class="wrap">
     <h1>Kafe hisobi</h1>
 
-    <div class="card">
-      <div class="type-toggle">
-        <button id="type-item" class="active">Narsa berdim</button>
-        <button id="type-pay">Pul oldim</button>
-      </div>
-      <input type="date" id="f-date">
-      <div id="f-name-row">
-        <input type="text" id="f-name" placeholder="Nima berildi (masalan: sola)">
-        <div id="quick-items" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;"></div>
-      </div>
-      <input type="number" id="f-price" placeholder="Narxi (so'm)">
-      <div id="f-qty-row"><input type="number" id="f-qty" placeholder="Soni (ixtiyoriy, standart 1)"></div>
-      <button class="primary" id="f-add"><i class="ti ti-plus"></i> Qo'shish</button>
+    <div id="login-screen" style="text-align:center; padding:3rem 1rem;">
+      <p style="color:var(--text-secondary); margin-bottom:1.5rem;">Davom etish uchun Google akkountingiz bilan kiring.
+      </p>
+      <button class="primary" id="google-signin" style="max-width:280px; margin:0 auto;">
+        <i class="ti ti-brand-google"></i> Google bilan kirish
+      </button>
     </div>
 
-    <div class="stats" id="stats"></div>
+    <div id="app-screen" style="display:none;">
+      <div style="display:flex; justify-content:flex-end; align-items:center; gap:8px; margin-bottom:1rem;">
+        <span id="user-email" style="font-size:13px; color:var(--text-secondary);"></span>
+        <button id="signout-btn"
+          style="border:none; background:none; color:var(--text-muted); font-size:13px; cursor:pointer; text-decoration:underline;">Chiqish</button>
+      </div>
 
-    <div class="tabs">
-      <button id="tab-all" class="active">Hammasi</button>
-      <button id="tab-today">Bugun</button>
+      <div class="card">
+        <div class="type-toggle">
+          <button id="type-item" class="active">Narsa berdim</button>
+          <button id="type-pay">Pul oldim</button>
+        </div>
+        <input type="date" id="f-date">
+        <div id="f-name-row">
+          <input type="text" id="f-name" placeholder="Nima berildi (masalan: sola)">
+          <div id="quick-items" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;"></div>
+        </div>
+        <input type="number" id="f-price" placeholder="Narxi (so'm)">
+        <div id="f-qty-row"><input type="number" id="f-qty" placeholder="Soni (ixtiyoriy, standart 1)"></div>
+        <button class="primary" id="f-add"><i class="ti ti-plus"></i> Qo'shish</button>
+      </div>
+
+      <div class="stats" id="stats"></div>
+
+      <div class="tabs">
+        <button id="tab-all" class="active">Hammasi</button>
+        <button id="tab-today">Bugun</button>
+      </div>
+
+      <div id="list"></div>
     </div>
-
-    <div id="list"></div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
   <script>
+    // ==== 1. Bu yerga o'zingizning Firebase konfiguratsiyangizni qo'ying ====
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    // ==========================================================================
+
     (function () {
-      const KEY = 'kafe-hisob-entries';
-      let entries = JSON.parse(localStorage.getItem(KEY) || '[]');
+      let entries = [];
       let view = 'all';
       let currentType = 'item';
+      let uid = null;
+      let unsubscribe = null;
 
       const fmt = n => Math.round(n).toLocaleString('ru-RU') + " so'm";
       const fmtDate = d => new Date(d).toLocaleDateString('uz-UZ', { day: '2-digit', month: 'long', year: 'numeric' });
       const signedTotal = e => e.type === 'pay' ? -(e.price * e.qty) : (e.price * e.qty);
-
-      function save() { localStorage.setItem(KEY, JSON.stringify(entries)); }
 
       function escapeHtml(s) {
         const d = document.createElement('div');
@@ -290,6 +323,56 @@
         return d.innerHTML;
       }
 
+      // ---- Auth ----
+      document.getElementById('google-signin').addEventListener('click', () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).catch(err => alert("Kirishda xatolik: " + err.message));
+      });
+
+      document.getElementById('signout-btn').addEventListener('click', () => {
+        auth.signOut();
+      });
+
+      auth.onAuthStateChanged(user => {
+        if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+        if (user) {
+          uid = user.uid;
+          document.getElementById('login-screen').style.display = 'none';
+          document.getElementById('app-screen').style.display = 'block';
+          document.getElementById('user-email').textContent = user.email || '';
+          listenToEntries();
+        } else {
+          uid = null;
+          entries = [];
+          document.getElementById('login-screen').style.display = 'block';
+          document.getElementById('app-screen').style.display = 'none';
+        }
+      });
+
+      // ---- Firestore ----
+      function listenToEntries() {
+        unsubscribe = db.collection('users').doc(uid).collection('entries')
+          .orderBy('createdAt', 'desc')
+          .onSnapshot(snap => {
+            entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            render();
+          }, err => {
+            console.error(err);
+          });
+      }
+
+      function addEntryToDb(entry) {
+        return db.collection('users').doc(uid).collection('entries').add({
+          ...entry,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+
+      function removeEntryFromDb(id) {
+        return db.collection('users').doc(uid).collection('entries').doc(id).delete();
+      }
+
+      // ---- UI logic ----
       function updateTypeButtons() {
         document.getElementById('type-item').classList.toggle('active', currentType === 'item');
         document.getElementById('type-pay').classList.toggle('active', currentType === 'pay');
@@ -317,20 +400,15 @@
         nameEl.style.borderColor = '';
         priceEl.style.borderColor = '';
 
-        entries.unshift({ id: Date.now().toString(36), date, name, price, qty, type: currentType });
+        addEntryToDb({ date, name, price, qty, type: currentType });
 
         nameEl.value = '';
         priceEl.value = '';
         qtyEl.value = '';
-
-        save();
-        render();
       }
 
       function removeEntry(id) {
-        entries = entries.filter(e => e.id !== id);
-        save();
-        render();
+        removeEntryFromDb(id);
       }
 
       function render() {
@@ -393,7 +471,6 @@
 
       function renderQuickItems() {
         const container = document.getElementById('quick-items');
-        // Collect unique item names with their most recent price, most recent first
         const seen = new Map();
         entries.filter(e => e.type === 'item').forEach(e => {
           if (!seen.has(e.name)) seen.set(e.name, e.price);
@@ -418,7 +495,6 @@
       document.getElementById('type-pay').addEventListener('click', () => { currentType = 'pay'; updateTypeButtons(); });
 
       updateTypeButtons();
-      render();
     })();
   </script>
 </body>
