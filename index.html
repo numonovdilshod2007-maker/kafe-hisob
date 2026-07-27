@@ -265,11 +265,18 @@
         <div class="type-toggle">
           <button id="type-item" class="active">Narsa berdim</button>
           <button id="type-pay">Pul oldim</button>
+          <button id="type-bread">Non</button>
         </div>
         <input type="date" id="f-date">
         <div id="f-name-row">
           <input type="text" id="f-name" placeholder="Nima berildi (masalan: sola)">
           <div id="quick-items" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;"></div>
+        </div>
+        <div id="f-payer-row" style="display:none;">
+          <div class="type-toggle">
+            <button id="payer-men" class="active" type="button">Men to'ladim</button>
+            <button id="payer-kafe" type="button">Kafe to'ladi</button>
+          </div>
         </div>
         <input type="number" id="f-price" placeholder="Narxi (so'm)">
         <div id="f-qty-row"><input type="number" id="f-qty" placeholder="Soni (ixtiyoriy, standart 1)"></div>
@@ -277,6 +284,7 @@
       </div>
 
       <div class="stats" id="stats"></div>
+      <div class="stats" id="bread-stats"></div>
 
       <div class="tabs">
         <button id="tab-all" class="active">Hammasi</button>
@@ -315,7 +323,8 @@
 
       const fmt = n => Math.round(n).toLocaleString('ru-RU') + " so'm";
       const fmtDate = d => new Date(d).toLocaleDateString('uz-UZ', { day: '2-digit', month: 'long', year: 'numeric' });
-      const signedTotal = e => e.type === 'pay' ? -(e.price * e.qty) : (e.price * e.qty);
+      const signedTotal = e => e.type === 'bread' ? 0 : (e.type === 'pay' ? -(e.price * e.qty) : (e.price * e.qty));
+      const breadSignedTotal = e => e.type !== 'bread' ? 0 : (e.payer === 'men' ? (e.price * e.qty) : -(e.price * e.qty));
 
       function escapeHtml(s) {
         const d = document.createElement('div');
@@ -373,13 +382,32 @@
       }
 
       // ---- UI logic ----
+      let breadPayer = 'men';
+
       function updateTypeButtons() {
         document.getElementById('type-item').classList.toggle('active', currentType === 'item');
         document.getElementById('type-pay').classList.toggle('active', currentType === 'pay');
+        document.getElementById('type-bread').classList.toggle('active', currentType === 'bread');
+
         document.getElementById('f-name-row').style.display = currentType === 'item' ? '' : 'none';
         document.getElementById('f-qty-row').style.display = currentType === 'item' ? '' : 'none';
-        document.getElementById('f-price').placeholder = currentType === 'item' ? "Narxi (so'm)" : "Qancha pul oldingiz (so'm)";
+        document.getElementById('f-payer-row').style.display = currentType === 'bread' ? '' : 'none';
+
+        if (currentType === 'item') document.getElementById('f-price').placeholder = "Narxi (so'm)";
+        else if (currentType === 'pay') document.getElementById('f-price').placeholder = "Qancha pul oldingiz (so'm)";
+        else document.getElementById('f-price').placeholder = "Non uchun qancha to'landi (so'm)";
       }
+
+      document.getElementById('payer-men').addEventListener('click', () => {
+        breadPayer = 'men';
+        document.getElementById('payer-men').classList.add('active');
+        document.getElementById('payer-kafe').classList.remove('active');
+      });
+      document.getElementById('payer-kafe').addEventListener('click', () => {
+        breadPayer = 'kafe';
+        document.getElementById('payer-kafe').classList.add('active');
+        document.getElementById('payer-men').classList.remove('active');
+      });
 
       function addEntry() {
         const dateEl = document.getElementById('f-date');
@@ -388,7 +416,7 @@
         const qtyEl = document.getElementById('f-qty');
 
         const date = dateEl.value || new Date().toISOString().slice(0, 10);
-        const name = currentType === 'item' ? nameEl.value.trim() : "To'lov";
+        const name = currentType === 'item' ? nameEl.value.trim() : (currentType === 'bread' ? 'Non' : "To'lov");
         const price = parseFloat(priceEl.value);
         const qty = currentType === 'item' ? (parseFloat(qtyEl.value) || 1) : 1;
 
@@ -400,7 +428,10 @@
         nameEl.style.borderColor = '';
         priceEl.style.borderColor = '';
 
-        addEntryToDb({ date, name, price, qty, type: currentType });
+        const entry = { date, name, price, qty, type: currentType };
+        if (currentType === 'bread') entry.payer = breadPayer;
+
+        addEntryToDb(entry);
 
         nameEl.value = '';
         priceEl.value = '';
@@ -425,6 +456,15 @@
       <div class="stat"><p>Shu oy o'zgarish</p><p>${fmt(monthNet)}</p></div>
     `;
 
+        const breadBalance = entries.reduce((s, e) => s + breadSignedTotal(e), 0);
+        const breadStatsEl = document.getElementById('bread-stats');
+        breadStatsEl.innerHTML = `
+      <div class="stat" style="grid-column: 1 / -1;">
+        <p>Non hisobi ${breadBalance >= 0 ? '(kafe qarzi)' : breadBalance < 0 ? '(sizning qarzingiz)' : ''}</p>
+        <p>${fmt(Math.abs(breadBalance))}</p>
+      </div>
+    `;
+
         document.getElementById('tab-all').classList.toggle('active', view === 'all');
         document.getElementById('tab-today').classList.toggle('active', view === 'today');
 
@@ -442,17 +482,28 @@
 
         listEl.innerHTML = dates.map(date => {
           const items = groups[date];
-          const dayNet = items.reduce((s, e) => s + signedTotal(e), 0);
+          const dayNet = items.reduce((s, e) => s + signedTotal(e) + breadSignedTotal(e), 0);
           const rows = items.map(e => {
             const isPay = e.type === 'pay';
+            const isBread = e.type === 'bread';
+            let icon = 'ti-package';
+            let label = escapeHtml(e.name);
+            let amountClass = '';
+            let sign = '';
+            if (isPay) { icon = 'ti-cash'; label = "To'lov olindi"; amountClass = 'pay'; sign = '-'; }
+            if (isBread) {
+              icon = 'ti-bread';
+              label = e.payer === 'men' ? "Non - siz to'ladingiz" : "Non - kafe to'ladi";
+              if (e.payer === 'kafe') { amountClass = 'pay'; sign = '-'; }
+            }
             return `
           <div class="row">
             <div class="row-left">
-              <i class="ti ${isPay ? 'ti-cash' : 'ti-package'}"></i>
-              <p>${isPay ? "To'lov olindi" : escapeHtml(e.name)}${!isPay && e.qty > 1 ? ` <span style="color:var(--text-secondary)">x${e.qty}</span>` : ''}</p>
+              <i class="ti ${icon}"></i>
+              <p>${label}${!isPay && !isBread && e.qty > 1 ? ` <span style="color:var(--text-secondary)">x${e.qty}</span>` : ''}</p>
             </div>
             <div class="row-right">
-              <span class="amount ${isPay ? 'pay' : ''}">${isPay ? '-' : ''}${fmt(e.price * e.qty)}</span>
+              <span class="amount ${amountClass}">${sign}${fmt(e.price * e.qty)}</span>
               <button class="del-btn" data-id="${e.id}" aria-label="O'chirish"><i class="ti ti-trash"></i></button>
             </div>
           </div>`;
@@ -493,6 +544,7 @@
       document.getElementById('tab-today').addEventListener('click', () => { view = 'today'; render(); });
       document.getElementById('type-item').addEventListener('click', () => { currentType = 'item'; updateTypeButtons(); });
       document.getElementById('type-pay').addEventListener('click', () => { currentType = 'pay'; updateTypeButtons(); });
+      document.getElementById('type-bread').addEventListener('click', () => { currentType = 'bread'; updateTypeButtons(); });
 
       updateTypeButtons();
     })();
