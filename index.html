@@ -19,6 +19,7 @@
       --accent: #0f6e56;
       --accent-bg: #e1f5ee;
       --danger: #a32d2d;
+      --danger-bg: #f8e8e8;
     }
 
     * {
@@ -53,6 +54,13 @@
       margin-bottom: 1.25rem;
     }
 
+    .card h2 {
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0 0 .75rem;
+      color: var(--text-secondary);
+    }
+
     .type-toggle {
       display: flex;
       gap: 8px;
@@ -77,7 +85,8 @@
       font-weight: 600;
     }
 
-    input {
+    input,
+    select {
       width: 100%;
       padding: 10px 12px;
       margin-bottom: 8px;
@@ -86,9 +95,11 @@
       font-size: 15px;
       background: var(--surface);
       color: var(--text-primary);
+      font-family: inherit;
     }
 
-    input:focus {
+    input:focus,
+    select:focus {
       outline: none;
       border-color: var(--accent);
     }
@@ -109,6 +120,41 @@
       opacity: 0.85;
     }
 
+    button.secondary {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+
+    button.ghost {
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+    }
+
+    .edit-banner {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--accent-bg);
+      color: var(--accent);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 13px;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
     .stats {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -122,6 +168,10 @@
       padding: 1rem;
     }
 
+    .stat.danger {
+      background: var(--danger-bg);
+    }
+
     .stat p:first-child {
       font-size: 13px;
       color: var(--text-secondary);
@@ -132,6 +182,25 @@
       font-size: 22px;
       font-weight: 600;
       margin: 0;
+    }
+
+    .stat.danger p:last-child {
+      color: var(--danger);
+    }
+
+    .stat.pos p:last-child {
+      color: var(--accent);
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .toolbar input,
+    .toolbar select {
+      margin-bottom: 0;
     }
 
     .tabs {
@@ -164,9 +233,25 @@
     .day-header {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       font-size: 13px;
       color: var(--text-secondary);
       margin-bottom: 4px;
+      cursor: pointer;
+      padding: 4px 0;
+    }
+
+    .day-header .chev {
+      transition: transform .15s ease;
+      margin-right: 4px;
+    }
+
+    .day-group.collapsed .chev {
+      transform: rotate(-90deg);
+    }
+
+    .day-group.collapsed .day-rows {
+      display: none;
     }
 
     .row {
@@ -175,6 +260,7 @@
       justify-content: space-between;
       padding: 10px 0;
       border-bottom: 1px solid var(--border);
+      cursor: pointer;
     }
 
     .row-left {
@@ -239,6 +325,48 @@
       border-color: var(--accent);
       color: var(--accent);
     }
+
+    .chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      height: 140px;
+      padding-top: 10px;
+    }
+
+    .chart-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      height: 100%;
+    }
+
+    .chart-bar {
+      width: 100%;
+      max-width: 34px;
+      border-radius: 6px 6px 0 0;
+      background: var(--accent);
+      min-height: 3px;
+    }
+
+    .chart-bar.neg {
+      background: var(--danger);
+    }
+
+    .chart-val {
+      font-size: 10px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+      white-space: nowrap;
+    }
+
+    .chart-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
   </style>
 </head>
 
@@ -255,13 +383,39 @@
     </div>
 
     <div id="app-screen" style="display:none;">
-      <div style="display:flex; justify-content:flex-end; align-items:center; gap:8px; margin-bottom:1rem;">
-        <span id="user-email" style="font-size:13px; color:var(--text-secondary);"></span>
-        <button id="signout-btn"
-          style="border:none; background:none; color:var(--text-muted); font-size:13px; cursor:pointer; text-decoration:underline;">Chiqish</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:1rem;">
+        <button id="settings-btn"
+          style="border:none; background:none; color:var(--text-muted); font-size:18px; cursor:pointer;"><i
+            class="ti ti-settings"></i></button>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span id="user-email" style="font-size:13px; color:var(--text-secondary);"></span>
+          <button id="signout-btn"
+            style="border:none; background:none; color:var(--text-muted); font-size:13px; cursor:pointer; text-decoration:underline;">Chiqish</button>
+        </div>
+      </div>
+
+      <div class="card" id="settings-card" style="display:none;">
+        <h2>Ulashish sozlamalari</h2>
+        <p style="font-size:13px; color:var(--text-secondary); margin:0 0 8px;">Sizning UID'ingiz (boshqa kishiga shu
+          qatorni yuboring, u shu orqali sizning hisobingizni ko'ra oladi):</p>
+        <input type="text" id="my-uid" readonly style="font-size:12px; background:var(--surface-1);">
+        <p style="font-size:13px; color:var(--text-secondary); margin:10px 0 8px;">Boshqa kishining UID'ini shu yerga
+          qo'shsangiz, u sizning hisobingizni ko'ra va tahrirlay oladi:</p>
+        <input type="text" id="add-uid" placeholder="Ruxsat beriladigan UID">
+        <button class="secondary" id="add-uid-btn">Ruxsat berish</button>
+        <div id="allowed-list" style="margin-top:8px;"></div>
+        <hr style="border:none; border-top:1px solid var(--border); margin:14px 0;">
+        <p style="font-size:13px; color:var(--text-secondary); margin:0 0 8px;">Boshqa birovning hisobini ko'rish uchun
+          uning UID'ini shu yerga kiriting (u sizga ruxsat bergan bo'lishi kerak):</p>
+        <input type="text" id="view-uid" placeholder="Ko'rish uchun UID (bo'sh = o'zim)">
+        <button class="secondary" id="view-uid-btn">Shu hisobga o'tish</button>
       </div>
 
       <div class="card">
+        <div class="edit-banner" id="edit-banner">
+          <span><i class="ti ti-edit"></i> Yozuvni tahrirlash</span>
+          <button class="ghost" id="cancel-edit">Bekor qilish</button>
+        </div>
         <div class="type-toggle">
           <button id="type-item" class="active">Narsa berdim</button>
           <button id="type-pay">Pul oldim</button>
@@ -286,12 +440,24 @@
       <div class="stats" id="stats"></div>
       <div class="stats" id="bread-stats"></div>
 
+      <div class="card">
+        <h2>Oylik statistika</h2>
+        <div class="chart" id="chart"></div>
+      </div>
+
+      <div class="toolbar">
+        <input type="text" id="f-search" placeholder="Qidirish...">
+        <select id="f-month"></select>
+      </div>
+
       <div class="tabs">
         <button id="tab-all" class="active">Hammasi</button>
         <button id="tab-today">Bugun</button>
       </div>
 
       <div id="list"></div>
+
+      <button class="secondary" id="export-csv"><i class="ti ti-download"></i> CSV holida yuklab olish</button>
     </div>
   </div>
 
@@ -319,10 +485,18 @@
       let view = 'all';
       let currentType = 'item';
       let uid = null;
+      let targetUid = null;
       let unsubscribe = null;
+      let editingId = null;
+      let searchTerm = '';
+      let monthFilter = '';
 
       const fmt = n => Math.round(n).toLocaleString('ru-RU') + " so'm";
       const fmtDate = d => new Date(d).toLocaleDateString('uz-UZ', { day: '2-digit', month: 'long', year: 'numeric' });
+      const fmtMonth = ym => {
+        const [y, m] = ym.split('-');
+        return new Date(y, m - 1, 1).toLocaleDateString('uz-UZ', { month: 'short', year: '2-digit' });
+      };
       const signedTotal = e => e.type === 'bread' ? 0 : (e.type === 'pay' ? -(e.price * e.qty) : (e.price * e.qty));
       const breadSignedTotal = e => e.type !== 'bread' ? 0 : (e.payer === 'men' ? (e.price * e.qty) : -(e.price * e.qty));
 
@@ -346,12 +520,17 @@
         if (unsubscribe) { unsubscribe(); unsubscribe = null; }
         if (user) {
           uid = user.uid;
+          targetUid = localStorage.getItem('kafeViewUid') || uid;
           document.getElementById('login-screen').style.display = 'none';
           document.getElementById('app-screen').style.display = 'block';
           document.getElementById('user-email').textContent = user.email || '';
+          document.getElementById('my-uid').value = uid;
+          document.getElementById('view-uid').value = targetUid !== uid ? targetUid : '';
           listenToEntries();
+          listenToAllowedList();
         } else {
           uid = null;
+          targetUid = null;
           entries = [];
           document.getElementById('login-screen').style.display = 'block';
           document.getElementById('app-screen').style.display = 'none';
@@ -360,26 +539,76 @@
 
       // ---- Firestore ----
       function listenToEntries() {
-        unsubscribe = db.collection('users').doc(uid).collection('entries')
+        if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+        unsubscribe = db.collection('users').doc(targetUid).collection('entries')
           .orderBy('createdAt', 'desc')
           .onSnapshot(snap => {
             entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
             render();
           }, err => {
             console.error(err);
+            alert("Bu hisobni ko'rishga ruxsatingiz yo'q yoki UID noto'g'ri.");
           });
       }
 
       function addEntryToDb(entry) {
-        return db.collection('users').doc(uid).collection('entries').add({
+        return db.collection('users').doc(targetUid).collection('entries').add({
           ...entry,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
       }
 
-      function removeEntryFromDb(id) {
-        return db.collection('users').doc(uid).collection('entries').doc(id).delete();
+      function updateEntryInDb(id, entry) {
+        return db.collection('users').doc(targetUid).collection('entries').doc(id).update(entry);
       }
+
+      function removeEntryFromDb(id) {
+        return db.collection('users').doc(targetUid).collection('entries').doc(id).delete();
+      }
+
+      // ---- Ulashish (sharing) ----
+      document.getElementById('settings-btn').addEventListener('click', () => {
+        const card = document.getElementById('settings-card');
+        card.style.display = card.style.display === 'none' ? 'block' : 'none';
+      });
+
+      function listenToAllowedList() {
+        db.collection('access').doc(uid).onSnapshot(doc => {
+          const allowed = (doc.exists && doc.data().allowedUids) || [];
+          const listEl = document.getElementById('allowed-list');
+          if (allowed.length === 0) { listEl.innerHTML = ''; return; }
+          listEl.innerHTML = allowed.map(u => `
+            <div class="row" style="cursor:default;">
+              <span style="font-size:12px; color:var(--text-secondary); word-break:break-all;">${escapeHtml(u)}</span>
+              <button class="del-btn" data-uid="${escapeHtml(u)}"><i class="ti ti-trash"></i></button>
+            </div>`).join('');
+          listEl.querySelectorAll('.del-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              db.collection('access').doc(uid).update({
+                allowedUids: firebase.firestore.FieldValue.arrayRemove(btn.dataset.uid)
+              });
+            });
+          });
+        }, () => { });
+      }
+
+      document.getElementById('add-uid-btn').addEventListener('click', () => {
+        const val = document.getElementById('add-uid').value.trim();
+        if (!val) return;
+        db.collection('access').doc(uid).set({
+          allowedUids: firebase.firestore.FieldValue.arrayUnion(val)
+        }, { merge: true }).then(() => {
+          document.getElementById('add-uid').value = '';
+        }).catch(err => alert('Xatolik: ' + err.message));
+      });
+
+      document.getElementById('view-uid-btn').addEventListener('click', () => {
+        const val = document.getElementById('view-uid').value.trim();
+        targetUid = val || uid;
+        if (val) localStorage.setItem('kafeViewUid', val);
+        else localStorage.removeItem('kafeViewUid');
+        listenToEntries();
+      });
 
       // ---- UI logic ----
       let breadPayer = 'men';
@@ -409,6 +638,36 @@
         document.getElementById('payer-men').classList.remove('active');
       });
 
+      function resetForm() {
+        document.getElementById('f-name').value = '';
+        document.getElementById('f-price').value = '';
+        document.getElementById('f-qty').value = '';
+        document.getElementById('f-date').valueAsDate = new Date();
+        editingId = null;
+        document.getElementById('edit-banner').style.display = 'none';
+        document.getElementById('f-add').innerHTML = `<i class="ti ti-plus"></i> Qo'shish`;
+      }
+
+      document.getElementById('cancel-edit').addEventListener('click', resetForm);
+
+      function startEdit(entry) {
+        editingId = entry.id;
+        currentType = entry.type;
+        updateTypeButtons();
+        document.getElementById('f-date').value = entry.date;
+        document.getElementById('f-name').value = entry.type === 'item' ? entry.name : '';
+        document.getElementById('f-price').value = entry.price;
+        document.getElementById('f-qty').value = entry.qty > 1 ? entry.qty : '';
+        if (entry.type === 'bread') {
+          breadPayer = entry.payer;
+          document.getElementById('payer-men').classList.toggle('active', breadPayer === 'men');
+          document.getElementById('payer-kafe').classList.toggle('active', breadPayer === 'kafe');
+        }
+        document.getElementById('edit-banner').style.display = 'flex';
+        document.getElementById('f-add').innerHTML = `<i class="ti ti-check"></i> Yangilash`;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
       function addEntry() {
         const dateEl = document.getElementById('f-date');
         const nameEl = document.getElementById('f-name');
@@ -431,19 +690,34 @@
         const entry = { date, name, price, qty, type: currentType };
         if (currentType === 'bread') entry.payer = breadPayer;
 
-        addEntryToDb(entry);
+        if (editingId) {
+          updateEntryInDb(editingId, entry);
+        } else {
+          addEntryToDb(entry);
+        }
 
-        nameEl.value = '';
-        priceEl.value = '';
-        qtyEl.value = '';
+        resetForm();
       }
 
       function removeEntry(id) {
+        if (editingId === id) resetForm();
         removeEntryFromDb(id);
+      }
+
+      function renderMonthOptions() {
+        const monthSel = document.getElementById('f-month');
+        const months = Array.from(new Set(entries.map(e => e.date.slice(0, 7)))).sort((a, b) => b.localeCompare(a));
+        const prev = monthFilter;
+        monthSel.innerHTML = `<option value="">Barcha oylar</option>` +
+          months.map(m => `<option value="${m}">${fmtMonth(m)}</option>`).join('');
+        monthSel.value = months.includes(prev) ? prev : '';
+        monthFilter = monthSel.value;
       }
 
       function render() {
         renderQuickItems();
+        renderMonthOptions();
+        renderChart();
         const statsEl = document.getElementById('stats');
         const listEl = document.getElementById('list');
 
@@ -452,14 +726,14 @@
         const monthNet = entries.filter(e => e.date.slice(0, 7) === thisMonth).reduce((s, e) => s + signedTotal(e), 0);
 
         statsEl.innerHTML = `
-      <div class="stat"><p>Kafe sizga qarzdor</p><p>${fmt(balance)}</p></div>
+      <div class="stat ${balance < 0 ? 'danger' : 'pos'}"><p>Kafe sizga qarzdor</p><p>${fmt(balance)}</p></div>
       <div class="stat"><p>Shu oy o'zgarish</p><p>${fmt(monthNet)}</p></div>
     `;
 
         const breadBalance = entries.reduce((s, e) => s + breadSignedTotal(e), 0);
         const breadStatsEl = document.getElementById('bread-stats');
         breadStatsEl.innerHTML = `
-      <div class="stat" style="grid-column: 1 / -1;">
+      <div class="stat ${breadBalance < 0 ? 'danger' : 'pos'}" style="grid-column: 1 / -1;">
         <p>Non hisobi ${breadBalance >= 0 ? '(kafe qarzi)' : breadBalance < 0 ? '(sizning qarzingiz)' : ''}</p>
         <p>${fmt(Math.abs(breadBalance))}</p>
       </div>
@@ -469,10 +743,15 @@
         document.getElementById('tab-today').classList.toggle('active', view === 'today');
 
         const today = new Date().toISOString().slice(0, 10);
-        const shown = view === 'today' ? entries.filter(e => e.date === today) : entries;
+        let shown = view === 'today' ? entries.filter(e => e.date === today) : entries;
+        if (monthFilter) shown = shown.filter(e => e.date.slice(0, 7) === monthFilter);
+        if (searchTerm) {
+          const q = searchTerm.toLowerCase();
+          shown = shown.filter(e => (e.name || '').toLowerCase().includes(q));
+        }
 
         if (shown.length === 0) {
-          listEl.innerHTML = `<p class="empty">${view === 'today' ? "Bugun hali yozuv yo'q." : "Hali yozuv yo'q. Yuqoridagi formadan qo'shing."}</p>`;
+          listEl.innerHTML = `<p class="empty">${view === 'today' ? "Bugun hali yozuv yo'q." : "Hech narsa topilmadi."}</p>`;
           return;
         }
 
@@ -497,7 +776,7 @@
               if (e.payer === 'kafe') { amountClass = 'pay'; sign = '-'; }
             }
             return `
-          <div class="row">
+          <div class="row" data-id="${e.id}">
             <div class="row-left">
               <i class="ti ${icon}"></i>
               <p>${label}${!isPay && !isBread && e.qty > 1 ? ` <span style="color:var(--text-secondary)">x${e.qty}</span>` : ''}</p>
@@ -509,15 +788,56 @@
           </div>`;
           }).join('');
           return `
-        <div class="day-group">
-          <div class="day-header"><span>${fmtDate(date)}</span><span>${fmt(dayNet)}</span></div>
-          ${rows}
+        <div class="day-group" data-date="${date}">
+          <div class="day-header" data-date="${date}"><span><i class="ti ti-chevron-down chev"></i>${fmtDate(date)}</span><span>${fmt(dayNet)}</span></div>
+          <div class="day-rows">${rows}</div>
         </div>`;
         }).join('');
 
         listEl.querySelectorAll('.del-btn').forEach(btn => {
-          btn.addEventListener('click', () => removeEntry(btn.dataset.id));
+          btn.addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            removeEntry(btn.dataset.id);
+          });
         });
+
+        listEl.querySelectorAll('.row').forEach(row => {
+          row.addEventListener('click', () => {
+            const entry = entries.find(e => e.id === row.dataset.id);
+            if (entry) startEdit(entry);
+          });
+        });
+
+        listEl.querySelectorAll('.day-header').forEach(header => {
+          header.addEventListener('click', () => {
+            header.closest('.day-group').classList.toggle('collapsed');
+          });
+        });
+      }
+
+      function renderChart() {
+        const chartEl = document.getElementById('chart');
+        const totals = {};
+        entries.forEach(e => {
+          const m = e.date.slice(0, 7);
+          totals[m] = (totals[m] || 0) + signedTotal(e) + breadSignedTotal(e);
+        });
+        const months = Object.keys(totals).sort().slice(-6);
+        if (months.length === 0) {
+          chartEl.innerHTML = `<p class="empty" style="padding:1rem 0;">Ma'lumot yo'q</p>`;
+          return;
+        }
+        const max = Math.max(...months.map(m => Math.abs(totals[m])), 1);
+        chartEl.innerHTML = months.map(m => {
+          const val = totals[m];
+          const h = Math.max(3, Math.round((Math.abs(val) / max) * 110));
+          return `
+        <div class="chart-col">
+          <span class="chart-val">${fmt(val)}</span>
+          <div class="chart-bar ${val < 0 ? 'neg' : ''}" style="height:${h}px;"></div>
+          <span class="chart-label">${fmtMonth(m)}</span>
+        </div>`;
+        }).join('');
       }
 
       function renderQuickItems() {
@@ -538,6 +858,27 @@
         });
       }
 
+      function exportCsv() {
+        const header = ['Sana', 'Turi', 'Nomi', 'Narxi', 'Soni', 'Jami', "To'lovchi"];
+        const rows = [...entries].sort((a, b) => a.date.localeCompare(b.date)).map(e => [
+          e.date,
+          e.type === 'item' ? 'Narsa' : e.type === 'pay' ? "To'lov" : 'Non',
+          e.type === 'item' ? e.name : (e.type === 'bread' ? 'Non' : "To'lov"),
+          e.price,
+          e.qty,
+          e.price * e.qty,
+          e.type === 'bread' ? (e.payer === 'men' ? 'Men' : 'Kafe') : ''
+        ]);
+        const csv = [header, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `kafe-hisobi-${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
       document.getElementById('f-add').addEventListener('click', addEntry);
       document.getElementById('f-date').valueAsDate = new Date();
       document.getElementById('tab-all').addEventListener('click', () => { view = 'all'; render(); });
@@ -545,6 +886,9 @@
       document.getElementById('type-item').addEventListener('click', () => { currentType = 'item'; updateTypeButtons(); });
       document.getElementById('type-pay').addEventListener('click', () => { currentType = 'pay'; updateTypeButtons(); });
       document.getElementById('type-bread').addEventListener('click', () => { currentType = 'bread'; updateTypeButtons(); });
+      document.getElementById('f-search').addEventListener('input', (e) => { searchTerm = e.target.value; render(); });
+      document.getElementById('f-month').addEventListener('change', (e) => { monthFilter = e.target.value; render(); });
+      document.getElementById('export-csv').addEventListener('click', exportCsv);
 
       updateTypeButtons();
     })();
