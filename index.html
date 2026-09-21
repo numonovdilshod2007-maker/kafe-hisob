@@ -618,6 +618,16 @@
       // ---- UI logic ----
       let breadPayer = 'men';
 
+      // Non uchun navbatni avtomatik almashtirib turadi: oxirgi yozilgan
+      // non kimning navbati bo'lsa, bugungisini shunga teskarisiga qo'yadi.
+      function autoSetBreadPayer() {
+        if (editingId) return; // tahrirlashda avtomatik o'zgartirmaymiz
+        const lastBread = entries.find(e => e.type === 'bread');
+        breadPayer = lastBread ? (lastBread.payer === 'men' ? 'kafe' : 'men') : 'men';
+        document.getElementById('payer-men').classList.toggle('active', breadPayer === 'men');
+        document.getElementById('payer-kafe').classList.toggle('active', breadPayer === 'kafe');
+      }
+
       function updateTypeButtons() {
         document.getElementById('type-item').classList.toggle('active', currentType === 'item');
         document.getElementById('type-pay').classList.toggle('active', currentType === 'pay');
@@ -721,6 +731,7 @@
 
       function render() {
         renderQuickItems();
+        autoSetBreadPayer();
         renderMonthOptions();
         renderChart();
         const statsEl = document.getElementById('stats');
@@ -889,7 +900,7 @@
       document.getElementById('tab-today').addEventListener('click', () => { view = 'today'; render(); });
       document.getElementById('type-item').addEventListener('click', () => { currentType = 'item'; updateTypeButtons(); });
       document.getElementById('type-pay').addEventListener('click', () => { currentType = 'pay'; updateTypeButtons(); });
-      document.getElementById('type-bread').addEventListener('click', () => { currentType = 'bread'; updateTypeButtons(); });
+      document.getElementById('type-bread').addEventListener('click', () => { currentType = 'bread'; updateTypeButtons(); autoSetBreadPayer(); });
       document.getElementById('f-search').addEventListener('input', (e) => { searchTerm = e.target.value; render(); });
       document.getElementById('f-month').addEventListener('change', (e) => { monthFilter = e.target.value; render(); });
       document.getElementById('export-csv').addEventListener('click', exportCsv);
