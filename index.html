@@ -7,19 +7,34 @@
   <title>Kafe hisobi</title>
   <link rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #f7f6f3;
+      --bg: #f5f4f0;
       --surface: #ffffff;
-      --surface-1: #f1efe8;
-      --text-primary: #1c1c1a;
-      --text-secondary: #5f5e5a;
-      --text-muted: #888780;
-      --border: #e3e1d8;
-      --accent: #0f6e56;
-      --accent-bg: #e1f5ee;
-      --danger: #a32d2d;
-      --danger-bg: #f8e8e8;
+      --surface-1: #f4f2ec;
+      --surface-2: #ece9e0;
+      --text-primary: #17170f;
+      --text-secondary: #63625a;
+      --text-muted: #93918a;
+      --border: #e7e4da;
+      --border-soft: #efece3;
+      --accent: #0d7a5f;
+      --accent-dark: #095e49;
+      --accent-bg: #e2f5ee;
+      --danger: #b23b3b;
+      --danger-bg: #fbebeb;
+      --amber: #b8722c;
+      --amber-bg: #fbf0e2;
+      --blue: #3a5fc4;
+      --blue-bg: #e8edfb;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-sm: 9px;
+      --shadow-sm: 0 1px 2px rgba(23, 23, 15, 0.04);
+      --shadow-md: 0 2px 6px rgba(23, 23, 15, 0.05), 0 12px 28px -12px rgba(23, 23, 15, 0.10);
     }
 
     * {
@@ -29,36 +44,42 @@
     body {
       margin: 0;
       background: var(--bg);
+      background-image: radial-gradient(circle at 15% 0%, rgba(13, 122, 95, 0.05), transparent 45%);
       color: var(--text-primary);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
     }
 
     .wrap {
       max-width: 640px;
       margin: 0 auto;
-      padding: 1.5rem 1rem 3rem;
+      padding: 1.75rem 1rem 3rem;
     }
 
     h1 {
-      font-size: 20px;
-      font-weight: 600;
-      margin: 0 0 1.25rem;
+      font-size: 21px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin: 0 0 1.5rem;
     }
 
     .card {
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1rem;
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      padding: 1.25rem;
       margin-bottom: 1.25rem;
     }
 
     .card h2 {
-      font-size: 14px;
-      font-weight: 600;
-      margin: 0 0 .75rem;
-      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin: 0 0 .9rem;
+      color: var(--text-muted);
     }
 
     .type-toggle {
@@ -69,67 +90,107 @@
 
     .type-toggle button {
       flex: 1;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: 12px 8px 10px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--border);
+      background: var(--surface-1);
       color: var(--text-secondary);
-      font-size: 14px;
+      font-size: 13px;
+      font-weight: 600;
       cursor: pointer;
+      transition: all .15s ease;
+    }
+
+    .type-toggle button i {
+      font-size: 18px;
+    }
+
+    .type-toggle button:active {
+      transform: scale(0.97);
     }
 
     .type-toggle button.active {
       background: var(--accent-bg);
-      color: var(--accent);
+      color: var(--accent-dark);
       border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(13, 122, 95, 0.10);
+    }
+
+    #f-payer-row .type-toggle button.active {
+      background: var(--amber-bg);
+      color: var(--amber);
+      border-color: var(--amber);
+      box-shadow: 0 0 0 3px rgba(184, 114, 44, 0.10);
+    }
+
+    label.field-label {
+      display: block;
+      font-size: 12px;
       font-weight: 600;
+      color: var(--text-muted);
+      margin: 4px 0 6px;
     }
 
     input,
     select {
       width: 100%;
-      padding: 10px 12px;
-      margin-bottom: 8px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      padding: 11px 13px;
+      margin-bottom: 9px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
       font-size: 15px;
       background: var(--surface);
       color: var(--text-primary);
       font-family: inherit;
+      transition: border-color .15s ease, box-shadow .15s ease;
     }
 
     input:focus,
     select:focus {
       outline: none;
       border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(13, 122, 95, 0.10);
     }
 
     button.primary {
       width: 100%;
-      padding: 11px;
-      border-radius: 8px;
+      padding: 13px;
+      border-radius: var(--radius-md);
       border: none;
-      background: var(--accent);
+      background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
       color: white;
       font-size: 15px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
+      box-shadow: 0 4px 12px -2px rgba(13, 122, 95, 0.35);
+      transition: transform .1s ease, box-shadow .15s ease;
     }
 
     button.primary:active {
-      opacity: 0.85;
+      transform: translateY(1px) scale(0.995);
+      box-shadow: 0 2px 6px -2px rgba(13, 122, 95, 0.35);
     }
 
     button.secondary {
       width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
+      padding: 11px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--border);
       background: var(--surface);
       color: var(--text-secondary);
       font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
       margin-top: 6px;
+      transition: background .15s ease;
+    }
+
+    button.secondary:active {
+      background: var(--surface-1);
     }
 
     button.ghost {
@@ -140,6 +201,7 @@
       cursor: pointer;
       text-decoration: underline;
       padding: 0;
+      font-weight: 600;
     }
 
     .edit-banner {
@@ -147,12 +209,12 @@
       align-items: center;
       justify-content: space-between;
       background: var(--accent-bg);
-      color: var(--accent);
-      border-radius: 8px;
-      padding: 8px 12px;
+      color: var(--accent-dark);
+      border-radius: var(--radius-sm);
+      padding: 9px 13px;
       font-size: 13px;
-      margin-bottom: 10px;
-      font-weight: 600;
+      margin-bottom: 12px;
+      font-weight: 700;
     }
 
     .stats {
@@ -163,25 +225,63 @@
     }
 
     .stat {
-      background: var(--surface-1);
-      border-radius: 10px;
-      padding: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      padding: 1.1rem 1.15rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--accent);
+      opacity: .35;
+    }
+
+    .stat-icon {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      font-size: 16px;
+      color: var(--text-muted);
+      opacity: .55;
+    }
+
+    .stat.danger::before {
+      background: var(--danger);
+      opacity: .5;
+    }
+
+    .stat.pos::before {
+      background: var(--accent);
+      opacity: .6;
     }
 
     .stat.danger {
       background: var(--danger-bg);
+      border-color: transparent;
     }
 
     .stat p:first-child {
-      font-size: 13px;
+      font-size: 12.5px;
+      font-weight: 600;
       color: var(--text-secondary);
-      margin: 0 0 4px;
+      margin: 0 0 6px;
     }
 
     .stat p:last-child {
-      font-size: 22px;
-      font-weight: 600;
+      font-size: 21px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
       margin: 0;
+      color: var(--text-primary);
     }
 
     .stat.danger p:last-child {
@@ -189,7 +289,7 @@
     }
 
     .stat.pos p:last-child {
-      color: var(--accent);
+      color: var(--accent-dark);
     }
 
     .toolbar {
@@ -207,43 +307,52 @@
       display: flex;
       gap: 8px;
       margin-bottom: 1rem;
+      background: var(--surface-2);
+      padding: 4px;
+      border-radius: var(--radius-md);
     }
 
     .tabs button {
       flex: 1;
-      padding: 9px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--surface);
+      padding: 8px;
+      border-radius: calc(var(--radius-md) - 3px);
+      border: none;
+      background: transparent;
       color: var(--text-secondary);
       cursor: pointer;
-      font-size: 14px;
+      font-size: 13.5px;
+      font-weight: 600;
+      transition: all .15s ease;
     }
 
     .tabs button.active {
-      background: var(--surface-1);
+      background: var(--surface);
       color: var(--text-primary);
-      font-weight: 600;
+      box-shadow: var(--shadow-sm);
     }
 
     .day-group {
-      margin-bottom: 1.25rem;
+      margin-bottom: 1.5rem;
     }
 
     .day-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-bottom: 4px;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 6px;
       cursor: pointer;
-      padding: 4px 0;
+      padding: 6px 2px;
     }
 
     .day-header .chev {
       transition: transform .15s ease;
-      margin-right: 4px;
+      margin-right: 6px;
+      font-size: 14px;
     }
 
     .day-group.collapsed .chev {
@@ -254,44 +363,91 @@
       display: none;
     }
 
+    .day-rows {
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      padding: 0 14px;
+    }
+
     .row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-soft);
       cursor: pointer;
+      transition: background .1s ease;
+    }
+
+    .day-rows .row:last-child {
+      border-bottom: none;
+    }
+
+    .row:active {
+      background: var(--surface-1);
+      margin: 0 -14px;
+      padding: 12px 14px;
     }
 
     .row-left {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 11px;
+      min-width: 0;
     }
 
-    .row-left i {
+    .icon-badge {
+      width: 34px;
+      height: 34px;
+      min-width: 34px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 16px;
-      color: var(--text-secondary);
+    }
+
+    .icon-badge.item {
+      background: var(--blue-bg);
+      color: var(--blue);
+    }
+
+    .icon-badge.pay {
+      background: var(--accent-bg);
+      color: var(--accent-dark);
+    }
+
+    .icon-badge.bread {
+      background: var(--amber-bg);
+      color: var(--amber);
     }
 
     .row-left p {
       margin: 0;
-      font-size: 15px;
+      font-size: 14.5px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .row-right {
       display: flex;
       align-items: center;
       gap: 10px;
+      flex-shrink: 0;
     }
 
     .amount {
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 700;
+      color: var(--text-primary);
     }
 
     .amount.pay {
-      color: var(--accent);
+      color: var(--accent-dark);
     }
 
     .del-btn {
@@ -301,29 +457,39 @@
       cursor: pointer;
       color: var(--text-muted);
       font-size: 16px;
+      opacity: .6;
+      transition: opacity .15s ease;
+    }
+
+    .del-btn:active {
+      opacity: 1;
+      color: var(--danger);
     }
 
     .empty {
       color: var(--text-muted);
       text-align: center;
-      padding: 2rem 0;
+      padding: 2.25rem 0;
       font-size: 14px;
     }
 
     .chip {
-      padding: 6px 12px;
+      padding: 7px 13px;
       border-radius: 999px;
-      border: 1px solid var(--border);
+      border: 1.5px solid var(--border);
       background: var(--surface-1);
       color: var(--text-primary);
-      font-size: 13px;
+      font-size: 12.5px;
+      font-weight: 600;
       cursor: pointer;
+      transition: all .12s ease;
     }
 
     .chip:active {
       background: var(--accent-bg);
       border-color: var(--accent);
-      color: var(--accent);
+      color: var(--accent-dark);
+      transform: scale(0.97);
     }
 
     .chart {
@@ -346,17 +512,18 @@
     .chart-bar {
       width: 100%;
       max-width: 34px;
-      border-radius: 6px 6px 0 0;
-      background: var(--accent);
+      border-radius: 8px 8px 3px 3px;
+      background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
       min-height: 3px;
     }
 
     .chart-bar.neg {
-      background: var(--danger);
+      background: linear-gradient(180deg, #c25555 0%, var(--danger) 100%);
     }
 
     .chart-val {
       font-size: 10px;
+      font-weight: 600;
       color: var(--text-secondary);
       margin-bottom: 4px;
       white-space: nowrap;
@@ -364,8 +531,9 @@
 
     .chart-label {
       font-size: 11px;
+      font-weight: 600;
       color: var(--text-muted);
-      margin-top: 6px;
+      margin-top: 8px;
     }
   </style>
 </head>
@@ -417,9 +585,9 @@
           <button class="ghost" id="cancel-edit">Bekor qilish</button>
         </div>
         <div class="type-toggle">
-          <button id="type-item" class="active">Narsa berdim</button>
-          <button id="type-pay">Pul oldim</button>
-          <button id="type-bread">Non</button>
+          <button id="type-item" class="active"><i class="ti ti-package"></i>Narsa berdim</button>
+          <button id="type-pay"><i class="ti ti-cash-banknote"></i>Pul oldim</button>
+          <button id="type-bread"><i class="ti ti-bread"></i>Non</button>
         </div>
         <input type="date" id="f-date">
         <div id="f-name-row">
@@ -428,8 +596,8 @@
         </div>
         <div id="f-payer-row" style="display:none;">
           <div class="type-toggle">
-            <button id="payer-men" class="active" type="button">Mening navbatim</button>
-            <button id="payer-kafe" type="button">Ularning navbati</button>
+            <button id="payer-men" class="active" type="button"><i class="ti ti-user"></i>Mening navbatim</button>
+            <button id="payer-kafe" type="button"><i class="ti ti-building-store"></i>Ularning navbati</button>
           </div>
           <p style="font-size:12px; color:var(--text-secondary); margin:-4px 0 8px;">Pulni baribir doim siz berasiz — bu
             yerda faqat o'sha kunning navbati kimniki ekanini belgilaysiz. "Ularning navbati" tanlansa, shu summa kafe
@@ -742,14 +910,15 @@
         const monthNet = entries.filter(e => e.date.slice(0, 7) === thisMonth).reduce((s, e) => s + signedTotal(e), 0);
 
         statsEl.innerHTML = `
-      <div class="stat ${balance < 0 ? 'danger' : 'pos'}"><p>Kafe sizga qarzdor</p><p>${fmt(balance)}</p></div>
-      <div class="stat"><p>Shu oy o'zgarish</p><p>${fmt(monthNet)}</p></div>
+      <div class="stat ${balance < 0 ? 'danger' : 'pos'}"><i class="ti ti-wallet stat-icon"></i><p>Kafe sizga qarzdor</p><p>${fmt(balance)}</p></div>
+      <div class="stat"><i class="ti ti-calendar-stats stat-icon"></i><p>Shu oy o'zgarish</p><p>${fmt(monthNet)}</p></div>
     `;
 
         const breadBalance = entries.reduce((s, e) => s + breadSignedTotal(e), 0);
         const breadStatsEl = document.getElementById('bread-stats');
         breadStatsEl.innerHTML = `
       <div class="stat ${breadBalance < 0 ? 'danger' : 'pos'}" style="grid-column: 1 / -1;">
+        <i class="ti ti-bread stat-icon"></i>
         <p>Non hisobi ${breadBalance >= 0 ? '(kafe qarzi)' : breadBalance < 0 ? '(sizning qarzingiz)' : ''}</p>
         <p>${fmt(Math.abs(breadBalance))}</p>
       </div>
@@ -782,18 +951,20 @@
             const isPay = e.type === 'pay';
             const isBread = e.type === 'bread';
             let icon = 'ti-package';
+            let badgeClass = 'item';
             let label = escapeHtml(e.name);
             let amountClass = '';
             let sign = '';
-            if (isPay) { icon = 'ti-cash'; label = "To'lov olindi"; amountClass = 'pay'; sign = '-'; }
+            if (isPay) { icon = 'ti-cash-banknote'; badgeClass = 'pay'; label = "To'lov olindi"; amountClass = 'pay'; sign = '-'; }
             if (isBread) {
               icon = 'ti-bread';
+              badgeClass = 'bread';
               label = e.payer === 'kafe' ? "Non - ularning navbati" : "Non - mening navbatim";
             }
             return `
           <div class="row" data-id="${e.id}">
             <div class="row-left">
-              <i class="ti ${icon}"></i>
+              <span class="icon-badge ${badgeClass}"><i class="ti ${icon}"></i></span>
               <p>${label}${!isPay && !isBread && e.qty > 1 ? ` <span style="color:var(--text-secondary)">x${e.qty}</span>` : ''}</p>
             </div>
             <div class="row-right">
