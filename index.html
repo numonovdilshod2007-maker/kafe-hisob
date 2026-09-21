@@ -428,9 +428,12 @@
         </div>
         <div id="f-payer-row" style="display:none;">
           <div class="type-toggle">
-            <button id="payer-men" class="active" type="button">Men to'ladim</button>
-            <button id="payer-kafe" type="button">Kafe to'ladi</button>
+            <button id="payer-men" class="active" type="button">Mening navbatim</button>
+            <button id="payer-kafe" type="button">Ularning navbati</button>
           </div>
+          <p style="font-size:12px; color:var(--text-secondary); margin:-4px 0 8px;">Pulni baribir doim siz berasiz — bu
+            yerda faqat o'sha kunning navbati kimniki ekanini belgilaysiz. "Ularning navbati" tanlansa, shu summa kafe
+            qarziga qo'shiladi.</p>
         </div>
         <input type="number" id="f-price" placeholder="Narxi (so'm)">
         <div id="f-qty-row"><input type="number" id="f-qty" placeholder="Soni (ixtiyoriy, standart 1)"></div>
@@ -498,7 +501,9 @@
         return new Date(y, m - 1, 1).toLocaleDateString('uz-UZ', { month: 'short', year: '2-digit' });
       };
       const signedTotal = e => e.type === 'bread' ? 0 : (e.type === 'pay' ? -(e.price * e.qty) : (e.price * e.qty));
-      const breadSignedTotal = e => e.type !== 'bread' ? 0 : (e.payer === 'men' ? (e.price * e.qty) : -(e.price * e.qty));
+      // Pulni baribir doim foydalanuvchi to'laydi. "Ularning navbati" bo'lsa - kafe qarzdor bo'ladi (+).
+      // "Mening navbatim" bo'lsa - bu shunchaki o'z xarajati, hisobga (qarzga) ta'sir qilmaydi (0).
+      const breadSignedTotal = e => e.type !== 'bread' ? 0 : (e.payer === 'kafe' ? (e.price * e.qty) : 0);
 
       function escapeHtml(s) {
         const d = document.createElement('div');
@@ -772,8 +777,7 @@
             if (isPay) { icon = 'ti-cash'; label = "To'lov olindi"; amountClass = 'pay'; sign = '-'; }
             if (isBread) {
               icon = 'ti-bread';
-              label = e.payer === 'men' ? "Non - siz to'ladingiz" : "Non - kafe to'ladi";
-              if (e.payer === 'kafe') { amountClass = 'pay'; sign = '-'; }
+              label = e.payer === 'kafe' ? "Non - ularning navbati" : "Non - mening navbatim";
             }
             return `
           <div class="row" data-id="${e.id}">
